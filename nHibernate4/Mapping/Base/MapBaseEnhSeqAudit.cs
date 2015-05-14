@@ -4,9 +4,9 @@ using NHibernate.Mapping.ByCode.Conformist;
 
 namespace nHibernate4.Mapping.Base
 {
-    public class MapBaseEnhSeq<T> : ClassMapping<T> where T : ModelBase
+    public class MapBaseEnhSeqAudit<T> : ClassMapping<T> where T : ModelBase
     {
-        public MapBaseEnhSeq()
+        public MapBaseEnhSeqAudit()
         {
             Id(x => x.Id, m =>
             {
@@ -17,6 +17,12 @@ namespace nHibernate4.Mapping.Base
                     increment_size = 20
                 }));
             });
+
+            //Audit Properties
+            Property(x => x.ChangedBy);
+            Property(x => x.ChangedOn);
+            Property(x => x.CreatedBy);
+            Property(x => x.CreatedOn);
 
             Version(x => x.Version, m =>
             {

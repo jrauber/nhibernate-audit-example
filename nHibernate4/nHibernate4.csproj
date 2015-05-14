@@ -60,7 +60,7 @@
     <Compile Include="Model\LifecycleExample\ChildILifecycle.cs" />
     <Compile Include="Model\LifecycleExample\ParentILifecycle.cs" />
     <Compile Include="Model\Interceptor\SimpleInterceptor.cs" />
-    <Compile Include="Mapping\Base\MapBaseEnhSeq.cs" />
+    <Compile Include="Mapping\Base\MapBaseEnhSeqAudit.cs" />
     <Compile Include="Mapping\ChildMap.cs" />
     <Compile Include="Mapping\ParentMap.cs" />
     <Compile Include="Model\Base\IAuditable.cs" />

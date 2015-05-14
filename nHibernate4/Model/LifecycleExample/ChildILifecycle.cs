@@ -12,22 +12,22 @@ namespace nHibernate4.Model.LifecycleExample
 
         public virtual LifecycleVeto OnSave(ISession s)
         {
-            throw new System.NotImplementedException();
+            return LifecycleVeto.NoVeto;
         }
 
         public virtual LifecycleVeto OnUpdate(ISession s)
         {
-            throw new System.NotImplementedException();
+            return LifecycleVeto.NoVeto;
         }
 
         public virtual LifecycleVeto OnDelete(ISession s)
         {
-            throw new System.NotImplementedException();
+            return LifecycleVeto.NoVeto;
         }
 
         public virtual void OnLoad(ISession s, object id)
         {
-            throw new System.NotImplementedException();
+            
         }
     }
 }

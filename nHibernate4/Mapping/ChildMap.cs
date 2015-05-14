@@ -3,7 +3,7 @@ using nHibernate4.Model;
 
 namespace nHibernate4.Mapping
 {
-    public class ChildMap : MapBaseEnhSeq<Child>
+    public class ChildMap : MapBaseEnhSeqAudit<Child>
     {
         public ChildMap()
         {

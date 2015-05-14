@@ -4,7 +4,7 @@ using NHibernate.Mapping.ByCode;
 
 namespace nHibernate4.Mapping
 {
-    public class ParentMap : MapBaseEnhSeq<Parent>
+    public class ParentMap : MapBaseEnhSeqAudit<Parent>
     {
         public ParentMap()
         {

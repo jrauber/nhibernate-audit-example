@@ -3,7 +3,7 @@ using nHibernate4.Model.LifecycleExample;
 
 namespace nHibernate4.Mapping.LifecycleExample
 {
-    public class ChildILifecycleMap : MapBaseEnhSeq<ChildILifecycle>
+    public class ChildILifecycleMap : MapBaseEnhSeqAudit<ChildILifecycle>
     {
         public ChildILifecycleMap()
         {

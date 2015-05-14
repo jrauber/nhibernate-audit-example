@@ -14,5 +14,10 @@ namespace nHibernate4.Model
         public virtual string Name { get; set; }
 
         public virtual ISet<Child> Children { get; set; }
+
+        public override string ToString()
+        {
+            return Id + "#" + Name;
+        }
     }
 }

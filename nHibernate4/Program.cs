@@ -1,11 +1,14 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using log4net;
 using log4net.Config;
 using nHibernate4.Model;
+using nHibernate4.Model.Interceptor;
 using nHibernate4.Model.LifecycleExample;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
+using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace nHibernate4
 {
@@ -19,8 +22,6 @@ namespace nHibernate4
 
             var cfg = new Configuration().Configure();
 
-            cfg.Interceptor = new SimpleInterceptor();
-
             var mapper = new ModelMapper();
             mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
             var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
@@ -31,70 +32,104 @@ namespace nHibernate4
 
             #region
 
-            GetValue(sf);
+            ExampleInterceptor(sf);
 
-            GetValue2(sf);
-
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
-            using (var tx = session.BeginTransaction())
-            {
-                long id = 4;
-                var test = session.Load<Parent>(id);
-
-                test.Name = "TEST";
-
-                session.SaveOrUpdate(test);
-
-                tx.Commit();
-            }
-
-
+            //ExampleILifecycle(sf);
 
             #endregion
         }
 
-        private static void GetValue(ISessionFactory sf)
+        private static void ExampleInterceptor(ISessionFactory sf)
         {
-            using (var session = sf.OpenSession())
+            #region Insert-Test-Data
+
+            using (var session = sf.OpenSession(new SimpleInterceptor()))
             using (var tx = session.BeginTransaction())
             {
-                for (var i = 0; i < 100; i++)
+                for (var i = 0; i < 5; i++)
                 {
                     var parent = new Parent
                     {
                         Name = "PARENT#" + i
                     };
 
-                    var child = new Child
+                    var child1 = new Child
                     {
                         Parent = parent,
-                        Name = "CHILDFORPARENT#" + i
+                        Name = "PARENT#" + i + "CHILD#1"
                     };
 
-                    parent.Children.Add(child);
+                    var child2 = new Child
+                    {
+                        Parent = parent,
+                        Name = "PARENT#" + i + "CHILD#2"
+                    };
+
+                    parent.Children.Add(child1);
+                    parent.Children.Add(child2);
 
                     session.SaveOrUpdate(parent);
-
-                    using (var session2 = sf.OpenSession())
-                    using (var tx2 = session2.BeginTransaction())
-                    {
-                        var parent2 = new Parent
-                        {
-                            Name = "PARENT#" + i
-                        };
-
-                        session2.SaveOrUpdate(parent2);
-
-                        tx2.Commit();
-                    }
                 }
 
                 tx.Commit();
             }
+
+            #endregion
+
+            #region Update-Test-Data
+
+            // rename existing parent
+            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var tx = session.BeginTransaction())
+            {
+                Parent parent = session.Get<Parent>(3L);
+
+                parent.Name += "UPDATE";
+
+                session.SaveOrUpdate(parent);
+
+                tx.Commit();
+            }
+
+            // insert new entry into existing collection
+            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var tx = session.BeginTransaction())
+            {
+                Parent parent = session.Get<Parent>(3L);
+
+                 var child = new Child
+                {
+                    Parent = parent,
+                    Name = parent.Name + "CHILD#3"
+                };
+
+                parent.Children.Add(child);
+
+                session.SaveOrUpdate(parent);
+
+                tx.Commit();
+            }
+
+            // rename entry in existing collection
+            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var tx = session.BeginTransaction())
+            {
+                Parent parent = session.Get<Parent>(3L);
+
+                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+
+                child.Name += "UPDATE";
+
+                session.SaveOrUpdate(parent);
+
+                tx.Commit();
+            }
+
+            #endregion
         }
 
 
-        private static void GetValue2(ISessionFactory sf)
+        private static void ExampleILifecycle(ISessionFactory sf)
         {
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
@@ -106,28 +141,22 @@ namespace nHibernate4
                         Name = "PARENT#" + i
                     };
 
-                    var child = new ChildILifecycle()
+                    var child1 = new ChildILifecycle()
                     {
                         Parent = parent,
-                        Name = "CHILDFORPARENT#" + i
+                        Name = "PARENT#" + i + "CHILD#1"
                     };
 
-                    parent.Children.Add(child);
+                    var child2 = new ChildILifecycle()
+                    {
+                        Parent = parent,
+                        Name = "PARENT#" + i + "CHILD#2"
+                    };
+
+                    parent.Children.Add(child1);
+                    parent.Children.Add(child2);
 
                     session.SaveOrUpdate(parent);
-
-                    using (var session2 = sf.OpenSession())
-                    using (var tx2 = session2.BeginTransaction())
-                    {
-                        var parent2 = new Parent
-                        {
-                            Name = "PARENT#" + i
-                        };
-
-                        session2.SaveOrUpdate(parent2);
-
-                        tx2.Commit();
-                    }
                 }
 
                 tx.Commit();

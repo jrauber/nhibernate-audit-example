@@ -4,7 +4,7 @@ using NHibernate.Mapping.ByCode;
 
 namespace nHibernate4.Mapping.LifecycleExample
 {
-    public class ParentILifecycleMap : MapBaseEnhSeq<ParentILifecycle>
+    public class ParentILifecycleMap : MapBaseEnhSeqAudit<ParentILifecycle>
     {
         public ParentILifecycleMap()
         {

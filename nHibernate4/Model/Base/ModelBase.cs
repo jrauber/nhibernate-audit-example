@@ -10,11 +10,11 @@ namespace nHibernate4.Model.Base
 
         public virtual int Version { get; set; }
 
-        public virtual DateTime CreatedOn { get; set; }
+        public virtual DateTime? CreatedOn { get; set; }
 
         public virtual string CreatedBy { get; set; }
 
-        public virtual DateTime ChangedOn { get; set; }
+        public virtual DateTime? ChangedOn { get; set; }
 
         public virtual string ChangedBy { get; set; }
     }

@@ -8,10 +8,10 @@ namespace nHibernate4.Model.Base
 {
     interface IAuditable
     {
-        DateTime CreatedOn { get; set; }
+        DateTime? CreatedOn { get; set; }
         string CreatedBy { get; set; }
 
-        DateTime ChangedOn { get; set; }
+        DateTime? ChangedOn { get; set; }
         string ChangedBy { get; set; }
     }
 }
