@@ -4,7 +4,7 @@ using NHibernate.Classic;
 
 namespace nHibernate4.Model.LifecycleExample
 {
-    public class ChildILifecycle : ModelBase, ILifecycle
+    public class ChildILifecycle : ModelBaseAudit, ILifecycle
     {
         public virtual string Name { get; set; }
 

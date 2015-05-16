@@ -24,7 +24,7 @@ namespace nHibernate4.Model.Interceptor
 
         public override bool OnSave(object entity, object id, object[] state, string[] propertyNames, IType[] types)
         {
-            Log.Debug(string.Format("Insert {0} , {1}", entity.GetType(), entity.ToString()));
+            Log.Debug(string.Format("Insert {0} , {1}", entity.GetType(), entity));
 
             if (entity is IAuditable)
             {
@@ -48,10 +48,10 @@ namespace nHibernate4.Model.Interceptor
             return base.OnSave(entity, id, state, propertyNames, types);
         }
 
-        public override bool OnFlushDirty(object entity, object id, object[] currentState, object[] previousState, string[] propertyNames,
-            IType[] types)
+        public override bool OnFlushDirty(object entity, object id, object[] currentState, 
+                                            object[] previousState, string[] propertyNames, IType[] types)
         {
-            Log.Debug(string.Format("Update {0} , {1}", entity.GetType(), entity.ToString()));
+            Log.Debug(string.Format("Update {0} , {1}", entity.GetType(), entity));
 
             if (entity is IAuditable)
             {

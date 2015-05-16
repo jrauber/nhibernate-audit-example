@@ -5,7 +5,7 @@ using NHibernate.Classic;
 
 namespace nHibernate4.Model
 {
-    public class ParentILifecycle : ModelBase, ILifecycle
+    public class ParentILifecycle : ModelBaseAudit, ILifecycle
     {
         public ParentILifecycle()
         {

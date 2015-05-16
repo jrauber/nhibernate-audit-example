@@ -1,8 +1,10 @@
 ﻿using nHibernate4.Model.Base;
+using NHibernate.Envers.Configuration.Attributes;
 
 namespace nHibernate4.Model
 {
-    public class Child : ModelBase
+    [Audited]
+    public class Child : ModelBaseAudit
     {
         public virtual string Name { get; set; }
 

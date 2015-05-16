@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using nHibernate4.Model.Base;
 using NHibernate.Classic;
+using NHibernate.Envers.Configuration.Attributes;
 
 namespace nHibernate4.Model
 {
-    public class Parent : ModelBase
+    [Audited]
+    public class Parent : ModelBaseAudit
     {
         public Parent()
         {
