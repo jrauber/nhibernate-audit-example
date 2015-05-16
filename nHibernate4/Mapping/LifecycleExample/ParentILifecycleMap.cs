@@ -10,7 +10,16 @@ namespace nHibernate4.Mapping.LifecycleExample
         {
             Property(x => x.Name);
 
-            Set(x => x.Children, m => { m.Cascade(Cascade.All); }, z => { z.OneToMany(o => { }); });
+            Set(x => x.Children,
+                m =>
+                {
+                    m.Cascade(Cascade.All | Cascade.DeleteOrphans); 
+                    m.Inverse(true);
+                },
+                z =>
+                {
+                    z.OneToMany(o => { });
+                });
         }
     }
 }

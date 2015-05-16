@@ -59,6 +59,7 @@
     <Compile Include="Mapping\LifecycleExample\ParentILifecycleMap.cs" />
     <Compile Include="Mapping\Base\MapBaseEnhSeq.cs" />
     <Compile Include="Mapping\Envers\MapEnversRevInfo.cs" />
+    <Compile Include="Mapping\NoRefIntModelMapper.cs" />
     <Compile Include="Model\Base\ModelBase.cs" />
     <Compile Include="Model\Envers\EnversRevInfo.cs" />
     <Compile Include="Model\Envers\SimpleRevInfoListener.cs" />

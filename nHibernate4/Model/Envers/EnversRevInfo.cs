@@ -13,7 +13,7 @@ namespace nHibernate4.Model.Envers
         public virtual long Id { get; set; }
 
         [RevisionTimestamp]
-        public virtual long RevisionTimestamp
+        public virtual DateTime RevisionTimestamp
         {
             get; set; 
         }

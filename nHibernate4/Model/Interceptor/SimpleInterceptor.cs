@@ -30,7 +30,7 @@ namespace nHibernate4.Model.Interceptor
             {
                 IAuditable auditEntity = entity as IAuditable;
                 DateTime now = DateTime.Now;
-                string user = WindowsIdentity.GetCurrent().Name;
+                string user = GetCurrentUserName();
 
                 if (string.IsNullOrWhiteSpace(auditEntity.CreatedBy))
                 {
@@ -57,7 +57,7 @@ namespace nHibernate4.Model.Interceptor
             {
                 IAuditable auditEntity = entity as IAuditable;
                 DateTime now = DateTime.Now;
-                string user = WindowsIdentity.GetCurrent().Name;
+                string user = GetCurrentUserName();
 
                 int idxChangedOn = GetIndex(propertyNames, CHANGED_ON);
                 int idxChangedBy = GetIndex(propertyNames, CHANGED_BY);
@@ -72,16 +72,28 @@ namespace nHibernate4.Model.Interceptor
             return base.OnFlushDirty(entity, id, currentState, previousState, propertyNames, types);
         }
 
-        private int GetIndex(object[] propertyNames, string property)
+        private int GetIndex(string[] propertyNames, string property)
         {
             for (var i = 0; i < propertyNames.Length; i++)
             {
-                if (propertyNames[i].ToString().Equals(property))
+                if (propertyNames[i].Equals(property))
                 {
                     return i;
                 }
             }
             return -1;
+        }
+
+        private string GetCurrentUserName()
+        {
+            var windowsIdentity = WindowsIdentity.GetCurrent();
+
+            if (windowsIdentity != null)
+            {
+                return windowsIdentity.Name;
+            }
+
+            return String.Empty;
         }
 
         public override SqlString OnPrepareStatement(SqlString sql)

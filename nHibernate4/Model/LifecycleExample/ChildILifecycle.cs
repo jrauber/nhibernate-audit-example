@@ -1,4 +1,6 @@
-﻿using nHibernate4.Model.Base;
+﻿using System;
+using System.Security.Principal;
+using nHibernate4.Model.Base;
 using NHibernate;
 using NHibernate.Classic;
 
@@ -12,11 +14,27 @@ namespace nHibernate4.Model.LifecycleExample
 
         public virtual LifecycleVeto OnSave(ISession s)
         {
+            IAuditable entity = this as IAuditable;
+
+            if (entity != null)
+            {
+                entity.CreatedOn = DateTime.Now;
+                entity.CreatedBy = GetCurrentUserName();
+            }
+
             return LifecycleVeto.NoVeto;
         }
 
         public virtual LifecycleVeto OnUpdate(ISession s)
         {
+            IAuditable entity = this as IAuditable;
+
+            if (entity != null)
+            {
+                entity.ChangedOn = DateTime.Now;
+                entity.ChangedBy = GetCurrentUserName();
+            }
+
             return LifecycleVeto.NoVeto;
         }
 
@@ -28,6 +46,18 @@ namespace nHibernate4.Model.LifecycleExample
         public virtual void OnLoad(ISession s, object id)
         {
             
+        }
+
+        private string GetCurrentUserName()
+        {
+            var windowsIdentity = WindowsIdentity.GetCurrent();
+
+            if (windowsIdentity != null)
+            {
+                return windowsIdentity.Name;
+            }
+
+            return String.Empty;
         }
     }
 }

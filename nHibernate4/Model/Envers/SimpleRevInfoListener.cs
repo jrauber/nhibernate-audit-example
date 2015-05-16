@@ -1,4 +1,5 @@
-﻿using System.Security.Principal;
+﻿using System;
+using System.Security.Principal;
 using NHibernate.Envers;
 
 namespace nHibernate4.Model.Envers
@@ -11,8 +12,21 @@ namespace nHibernate4.Model.Envers
 
             if (revInfo != null)
             {
-                revInfo.UserName = WindowsIdentity.GetCurrent().Name;
+                revInfo.UserName = GetCurrentUserName();
             }
         }
+
+        private string GetCurrentUserName()
+        {
+            var windowsIdentity = WindowsIdentity.GetCurrent();
+
+            if (windowsIdentity != null)
+            {
+                return windowsIdentity.Name;
+            }
+
+            return String.Empty;
+        }
+
     }
 }

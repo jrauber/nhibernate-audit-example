@@ -1,12 +1,8 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using nHibernate4.Mapping.Base;
-using nHibernate4.Model.Base;
-using nHibernate4.Model.Envers;
-using NHibernate.Criterion;
+﻿using nHibernate4.Model.Envers;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Mapping.ByCode.Conformist;
 
-namespace nHibernate4.Mapping.NewFolder1
+namespace nHibernate4.Mapping.Envers
 {
     public class MapEnversRevInfo : ClassMapping<EnversRevInfo>
     {
@@ -28,15 +24,15 @@ namespace nHibernate4.Mapping.NewFolder1
             Property(x => x.UserName);
 
             Set(x => x.ChangedObjects,
-               m =>
-               {
-                   m.Table("REVINFO_DETAIL");
-                   m.Cascade(Cascade.All | Cascade.DeleteOrphans);                   
-               },
-               rel =>
-               {
-                   rel.Element();
-               });
+                m =>
+                {
+                    m.Table("REVINFO_DETAIL");
+                    m.Cascade(Cascade.All | Cascade.DeleteOrphans);
+                },
+                rel =>
+                {   
+                    rel.Element();
+                });
         }
     }
 }
