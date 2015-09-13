@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using log4net;
 using log4net.Config;
-using nHibernate4.Mapping;
 using nHibernate4.Model;
 using nHibernate4.Model.Interceptor;
 using nHibernate4.Model.LifecycleExample;
 using nHibernate4.Model.Listener;
 using NHibernate;
 using NHibernate.Cfg;
+using NHibernate.Envers;
 using NHibernate.Envers.Configuration;
 using NHibernate.Envers.Configuration.Attributes;
+using NHibernate.Envers.Query;
 using NHibernate.Event;
 using NHibernate.Mapping.ByCode;
 
@@ -19,28 +21,28 @@ namespace nHibernate4
 {
     internal class Program
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof (Program));
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
 
-        private const bool DROP_GENERATED_FK_AND_RI = false;
+        private const bool DROP_GENERATED_FK_AND_RI = true; // Drop all FK from DB if true
 
         private static void Main(string[] args)
         {
             XmlConfigurator.Configure();
 
-            ExampleInterceptor();
+            //ExampleILifecycle();
 
-            ExampleListener();
+            //ExampleInterceptor();
+
+            //ExampleListener();
 
             ExampleEnvers();
-
-            ExampleILifecycle();
         }
 
         private static void ExampleEnvers()
         {
             var cfg = new Configuration().Configure();
 
-            var mapper = new NoRefIntModelMapper();
+            var mapper = new ConventionModelMapper();
             mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
             var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
 
@@ -48,9 +50,10 @@ namespace nHibernate4
             
             // Default-Strategy does not output the end of a given REV
             //cfg.SetEnversProperty(ConfigurationKey.AuditStrategy, typeof(NHibernate.Envers.Strategy.DefaultAuditStrategy));
-            
+
             // Validity-Strategy sets a revison end on changes
             cfg.SetEnversProperty(ConfigurationKey.AuditStrategy, typeof(NHibernate.Envers.Strategy.ValidityAuditStrategy));
+
             cfg.SetEnversProperty(ConfigurationKey.AuditStrategyValidityStoreRevendTimestamp, true); // Write timestap when revision ends
             cfg.SetEnversProperty(ConfigurationKey.TrackEntitiesChangedInRevision, true); // Write list of object-types in REV 
             cfg.SetEnversProperty(ConfigurationKey.GlobalWithModifiedFlag, true); // Flag which values were changed 
@@ -59,7 +62,7 @@ namespace nHibernate4
 
             var sf = cfg.BuildSessionFactory();
 
-            DropAllForeignKeysFromDatabase(cfg, sf, DROP_GENERATED_FK_AND_RI);
+            //DropAllForeignKeysFromDatabase(cfg, sf, DROP_GENERATED_FK_AND_RI);
 
             #region Insert-Test-Data
 
@@ -172,13 +175,39 @@ namespace nHibernate4
             }
 
             #endregion
+
+            #region query
+
+            // Retrive object-state by revision number
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                IAuditReader auditReader = session.Auditer();
+                IEntityAuditQuery<Parent> query = auditReader.CreateQuery().ForEntitiesAtRevision<Parent>(5);
+                IEnumerable<Parent> entity = query.Results();
+
+                tx.Commit();
+            }
+
+            // Retrive object-state by revision number
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                IAuditReader auditReader = session.Auditer();
+                IEntityAuditQuery<Parent> query = auditReader.CreateQuery().ForEntitiesAtRevision<Parent>(5);
+                IEnumerable<Parent> entity = query.Results();
+
+                tx.Commit();
+            }
+
+            #endregion
         }
 
         private static void ExampleListener()
         {
             var cfg = new Configuration().Configure();
 
-            var mapper = new NoRefIntModelMapper();
+            var mapper = new ConventionModelMapper();
             mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
             var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
 
@@ -312,7 +341,7 @@ namespace nHibernate4
         {
             var cfg = new Configuration().Configure();
 
-            var mapper = new NoRefIntModelMapper();
+            var mapper = new ConventionModelMapper();
 
             mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
             var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
@@ -414,7 +443,7 @@ namespace nHibernate4
         {
             var cfg = new Configuration().Configure();
 
-            var mapper = new NoRefIntModelMapper();
+            var mapper = new ConventionModelMapper();
             mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
             var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
 
@@ -542,7 +571,6 @@ namespace nHibernate4
         {
             if (dropFkAndRI)
             {
-
                 var tableNamesFromMappings = cfg.ClassMappings.Select(x => x.Table.Name);
 
                 var dropAllForeignKeysSql =

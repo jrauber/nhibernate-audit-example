@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using nHibernate4.Model.Base;
-using nHibernate4.Model.Interceptor;
 using NHibernate.Event;
-using NHibernate.Event.Default;
-using NHibernate.Type;
 
 namespace nHibernate4.Model.Listener
 {
