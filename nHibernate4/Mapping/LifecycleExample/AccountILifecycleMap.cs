@@ -4,13 +4,15 @@ using NHibernate.Mapping.ByCode;
 
 namespace nHibernate4.Mapping.LifecycleExample
 {
-    public class ParentILifecycleMap : MapBaseEnhSeqAudit<ParentILifecycle>
+    public class AccountILifecycleMap : MapBaseEnhSeqAudit<AccountILifecycle>
     {
-        public ParentILifecycleMap()
+        public AccountILifecycleMap()
         {
-            Property(x => x.Name);
+            Property(x => x.FirstName);
 
-            Set(x => x.Children,
+            Property(x => x.LastName);
+
+            Set(x => x.Address,
                 m =>
                 {
                     m.Cascade(Cascade.All | Cascade.DeleteOrphans); 

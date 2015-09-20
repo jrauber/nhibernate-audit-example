@@ -27,6 +27,5 @@ namespace nHibernate4.Model.Envers
 
             return String.Empty;
         }
-
     }
 }

@@ -56,22 +56,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mapping\LifecycleExample\ChildILifecycleMap.cs" />
-    <Compile Include="Mapping\LifecycleExample\ParentILifecycleMap.cs" />
+    <Compile Include="Mapping\LifecycleExample\AccountILifecycleMap.cs" />
     <Compile Include="Mapping\Base\MapBaseEnhSeq.cs" />
     <Compile Include="Mapping\Envers\MapEnversRevInfo.cs" />
     <Compile Include="Model\Base\ModelBase.cs" />
     <Compile Include="Model\Envers\EnversRevInfo.cs" />
     <Compile Include="Model\Envers\SimpleRevInfoListener.cs" />
-    <Compile Include="Model\LifecycleExample\ChildILifecycle.cs" />
-    <Compile Include="Model\LifecycleExample\ParentILifecycle.cs" />
+    <Compile Include="Model\LifecycleExample\AddressILifecycle.cs" />
+    <Compile Include="Model\LifecycleExample\AccountILifecycle.cs" />
     <Compile Include="Model\Interceptor\SimpleInterceptor.cs" />
     <Compile Include="Mapping\Base\MapBaseEnhSeqAudit.cs" />
-    <Compile Include="Mapping\ChildMap.cs" />
-    <Compile Include="Mapping\ParentMap.cs" />
+    <Compile Include="Mapping\AddressMap.cs" />
+    <Compile Include="Mapping\AccountMap.cs" />
     <Compile Include="Model\Base\IAuditable.cs" />
     <Compile Include="Model\Listener\SimpleListener.cs" />
-    <Compile Include="Model\Parent.cs" />
-    <Compile Include="Model\Child.cs" />
+    <Compile Include="Model\Account.cs" />
+    <Compile Include="Model\Address.cs" />
     <Compile Include="Model\Base\ModelBaseAudit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,16 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Principal;
 using nHibernate4.Model.Base;
+using nHibernate4.Model.LifecycleExample;
 using NHibernate;
 using NHibernate.Classic;
 
-namespace nHibernate4.Model.LifecycleExample
+namespace nHibernate4.Model
 {
-    public class ChildILifecycle : ModelBaseAudit, ILifecycle
+    public class AccountILifecycle : ModelBaseAudit, ILifecycle
     {
-        public virtual string Name { get; set; }
+        public AccountILifecycle()
+        {
+            Address = new HashSet<AddressILifecycle>();
+        }
 
-        public virtual ParentILifecycle Parent { get; set; }
+        public virtual string FirstName { get; set; }
+
+        public virtual string LastName { get; set; }
+
+        public virtual ISet<AddressILifecycle> Address { get; set; }
+
+        public virtual LifecycleVeto OnDelete(NHibernate.ISession s)
+        {
+            return LifecycleVeto.NoVeto;
+        }
+
+        public virtual void OnLoad(NHibernate.ISession s, object id)
+        {
+           
+        }
 
         public virtual LifecycleVeto OnSave(ISession s)
         {
@@ -36,16 +55,6 @@ namespace nHibernate4.Model.LifecycleExample
             }
 
             return LifecycleVeto.NoVeto;
-        }
-
-        public virtual LifecycleVeto OnDelete(ISession s)
-        {
-            return LifecycleVeto.NoVeto;
-        }
-
-        public virtual void OnLoad(ISession s, object id)
-        {
-            
         }
 
         private string GetCurrentUserName()

@@ -3,13 +3,19 @@ using nHibernate4.Model.LifecycleExample;
 
 namespace nHibernate4.Mapping.LifecycleExample
 {
-    public class ChildILifecycleMap : MapBaseEnhSeqAudit<ChildILifecycle>
+    public class AddressILifecycleMap : MapBaseEnhSeqAudit<AddressILifecycle>
     {
-        public ChildILifecycleMap()
+        public AddressILifecycleMap()
         {
-            Property(x => x.Name);
+            Property(x => x.Street);
 
-            ManyToOne(x => x.Parent);
+            Property(x => x.HouseNumber);
+
+            Property(x => x.ZipCode);
+
+            Property(x => x.City);
+
+            ManyToOne(x => x.Account);
         }
     }
 }

@@ -4,13 +4,15 @@ using NHibernate.Mapping.ByCode;
 
 namespace nHibernate4.Mapping
 {
-    public class ParentMap : MapBaseEnhSeqAudit<Parent>
+    public class AccountMap : MapBaseEnhSeqAudit<Account>
     {
-        public ParentMap()
+        public AccountMap()
         {
-            Property(x => x.Name);
+            Property(x => x.FirstName);
 
-            Set(x => x.Children, 
+            Property(x => x.LastName);
+
+            Set(x => x.Address, 
                 m =>
                 {
                     m.Cascade(Cascade.All | Cascade.DeleteOrphans); 

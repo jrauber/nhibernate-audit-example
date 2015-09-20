@@ -5,8 +5,6 @@ using System.Reflection;
 using log4net;
 using log4net.Config;
 using nHibernate4.Model;
-using nHibernate4.Model.Interceptor;
-using nHibernate4.Model.LifecycleExample;
 using nHibernate4.Model.Listener;
 using NHibernate;
 using NHibernate.Cfg;
@@ -23,7 +21,7 @@ namespace nHibernate4
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Program));
 
-        private const bool DROP_GENERATED_FK_AND_RI = true; // Drop all FK from DB if true
+        private const bool DROP_GENERATED_FK_AND_RI = false; // Drop all FK from DB if true
 
         private static void Main(string[] args)
         {
@@ -69,30 +67,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                for (var i = 0; i < 5; i++)
+                var parent = new Account
                 {
-                    var parent = new Parent
-                    {
-                        Name = "PARENT#" + i
-                    };
+                    FirstName = "Alan",
+                    LastName = "Turing"
+                };
 
-                    var child1 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#1"
-                    };
+                var address1 = new Address
+                {
+                    Account = parent,
+                    Street = "Adlington Road",
+                    HouseNumber = "42",
+                    ZipCode = "SK9",
+                    City = "Wilmslow"
+                };
 
-                    var child2 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#2"
-                    };
+                parent.Address.Add(address1);
 
-                    parent.Children.Add(child1);
-                    parent.Children.Add(child2);
-
-                    session.SaveOrUpdate(parent);
-                }
+                session.SaveOrUpdate(parent);
 
                 tx.Commit();
             }
@@ -101,15 +93,15 @@ namespace nHibernate4
 
             #region Update-Test-Data
 
-            // rename existing parent
+            // rename existing Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(1L);
 
-                parent.Name += "UPDATE";
+                account.FirstName = "Alan Mathison";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -118,17 +110,20 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(1L);
 
-                var child = new Child
+                var address1 = new Address
                 {
-                    Parent = parent,
-                    Name = parent.Name + "CHILD#3"
+                    Account = account,
+                    Street = "Bletchley Park",
+                    HouseNumber = "",
+                    ZipCode = "MK3",
+                    City = "Milton Keynes"
                 };
 
-                parent.Children.Add(child);
+                account.Address.Add(address1);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -137,13 +132,13 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(1L);
 
-                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
-                child.Name += "UPDATE";
+                address.HouseNumber = "HUT 8";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -152,24 +147,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(1L);
 
-                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Adlington"));
 
-                parent.Children.Remove(child);
+                account.Address.Remove(address);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
-            // delete parent
+            // delete Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(1L);
 
-                session.Delete(parent);
+                session.Delete(account);
 
                 tx.Commit();
             }
@@ -183,8 +178,8 @@ namespace nHibernate4
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
-                IEntityAuditQuery<Parent> query = auditReader.CreateQuery().ForEntitiesAtRevision<Parent>(5);
-                IEnumerable<Parent> entity = query.Results();
+                IEntityAuditQuery<Account> query = auditReader.CreateQuery().ForEntitiesAtRevision<Account>(5);
+                IEnumerable<Account> entity = query.Results();
 
                 tx.Commit();
             }
@@ -194,8 +189,8 @@ namespace nHibernate4
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
-                IEntityAuditQuery<Parent> query = auditReader.CreateQuery().ForEntitiesAtRevision<Parent>(5);
-                IEnumerable<Parent> entity = query.Results();
+                IEntityAuditQuery<Account> query = auditReader.CreateQuery().ForEntitiesAtRevision<Account>(5);
+                IEnumerable<Account> entity = query.Results();
 
                 tx.Commit();
             }
@@ -229,30 +224,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                for (var i = 0; i < 5; i++)
+                var parent = new Account
                 {
-                    var parent = new Parent
-                    {
-                        Name = "PARENT#" + i
-                    };
+                    FirstName = "Alan",
+                    LastName = "Turing"
+                };
 
-                    var child1 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#1"
-                    };
+                var address1 = new Address
+                {
+                    Account = parent,
+                    Street = "Adlington Road",
+                    HouseNumber = "42",
+                    ZipCode = "SK9",
+                    City = "Wilmslow"
+                };
 
-                    var child2 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#2"
-                    };
+                parent.Address.Add(address1);
 
-                    parent.Children.Add(child1);
-                    parent.Children.Add(child2);
-
-                    session.SaveOrUpdate(parent);
-                }
+                session.SaveOrUpdate(parent);
 
                 tx.Commit();
             }
@@ -261,15 +250,15 @@ namespace nHibernate4
 
             #region Update-Test-Data
 
-            // rename existing parent
+            // rename existing Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                parent.Name += "UPDATE";
+                account.FirstName = "Alan Mathison";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -278,32 +267,35 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                var child = new Child
+                var address1 = new Address
                 {
-                    Parent = parent,
-                    Name = parent.Name + "CHILD#3"
+                    Account = account,
+                    Street = "Bletchley Park",
+                    HouseNumber = "",
+                    ZipCode = "MK3",
+                    City = "Milton Keynes"
                 };
 
-                parent.Children.Add(child);
+                account.Address.Add(address1);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
             // rename entry in existing collection
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
-                child.Name += "UPDATE";
+                address.HouseNumber = "HUT 8";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -312,24 +304,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Adlington"));
 
-                parent.Children.Remove(child);
+                account.Address.Remove(address);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
-            // delete parent
+            // delete Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                session.Delete(parent);
+                session.Delete(account);
 
                 tx.Commit();
             }
@@ -354,33 +346,27 @@ namespace nHibernate4
 
             #region Insert-Test-Data
 
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                for (var i = 0; i < 5; i++)
+                var parent = new Account
                 {
-                    var parent = new Parent
-                    {
-                        Name = "PARENT#" + i
-                    };
+                    FirstName = "Alan",
+                    LastName = "Turing"
+                };
 
-                    var child1 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#1"
-                    };
+                var address1 = new Address
+                {
+                    Account = parent,
+                    Street = "Adlington Road",
+                    HouseNumber = "42",
+                    ZipCode = "SK9",
+                    City = "Wilmslow"
+                };
 
-                    var child2 = new Child
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#2"
-                    };
+                parent.Address.Add(address1);
 
-                    parent.Children.Add(child1);
-                    parent.Children.Add(child2);
-
-                    session.SaveOrUpdate(parent);
-                }
+                session.SaveOrUpdate(parent);
 
                 tx.Commit();
             }
@@ -389,49 +375,78 @@ namespace nHibernate4
 
             #region Update-Test-Data
 
-            // rename existing parent
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            // rename existing Account
+            using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                parent.Name += "UPDATE";
+                account.FirstName = "Alan Mathison";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
             // insert new entry into existing collection
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                 var child = new Child
+                var address1 = new Address
                 {
-                    Parent = parent,
-                    Name = parent.Name + "CHILD#3"
+                    Account = account,
+                    Street = "Bletchley Park",
+                    HouseNumber = "",
+                    ZipCode = "MK3",
+                    City = "Milton Keynes"
                 };
 
-                parent.Children.Add(child);
+                account.Address.Add(address1);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
             // rename entry in existing collection
-            using (var session = sf.OpenSession(new SimpleInterceptor()))
+            using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Parent parent = session.Get<Parent>(3L);
+                Account account = session.Get<Account>(3L);
 
-                Child child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
-                child.Name += "UPDATE";
+                address.HouseNumber = "HUT 8";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
+
+                tx.Commit();
+            }
+
+            // delete entry in existing collection
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                Account account = session.Get<Account>(3L);
+
+                Address address = account.Address.Single(c => c.Street.Contains("Adlington"));
+
+                account.Address.Remove(address);
+
+                session.SaveOrUpdate(account);
+
+                tx.Commit();
+            }
+
+            // delete Account
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                Account account = session.Get<Account>(3L);
+
+                session.Delete(account);
 
                 tx.Commit();
             }
@@ -458,30 +473,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                for (var i = 0; i < 5; i++)
+                var parent = new Account
                 {
-                    var parent = new ParentILifecycle
-                    {
-                        Name = "PARENT#" + i
-                    };
+                    FirstName = "Alan",
+                    LastName = "Turing"
+                };
 
-                    var child1 = new ChildILifecycle
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#1"
-                    };
+                var address1 = new Address
+                {
+                    Account = parent,
+                    Street = "Adlington Road",
+                    HouseNumber = "42",
+                    ZipCode = "SK9",
+                    City = "Wilmslow"
+                };
 
-                    var child2 = new ChildILifecycle
-                    {
-                        Parent = parent,
-                        Name = "PARENT#" + i + "CHILD#2"
-                    };
+                parent.Address.Add(address1);
 
-                    parent.Children.Add(child1);
-                    parent.Children.Add(child2);
-
-                    session.SaveOrUpdate(parent);
-                }
+                session.SaveOrUpdate(parent);
 
                 tx.Commit();
             }
@@ -490,15 +499,15 @@ namespace nHibernate4
 
             #region Update-Test-Data
 
-            // rename existing parent
+            // rename existing Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                ParentILifecycle parent = session.Get<ParentILifecycle>(3L);
+                Account account = session.Get<Account>(3L);
 
-                parent.Name += "UPDATE";
+                account.FirstName = "Alan Mathison";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -507,17 +516,20 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                ParentILifecycle parent = session.Get<ParentILifecycle>(3L);
+                Account account = session.Get<Account>(3L);
 
-                var child = new ChildILifecycle
+                var address1 = new Address
                 {
-                    Parent = parent,
-                    Name = parent.Name + "CHILD#3"
+                    Account = account,
+                    Street = "Bletchley Park",
+                    HouseNumber = "",
+                    ZipCode = "MK3",
+                    City = "Milton Keynes"
                 };
 
-                parent.Children.Add(child);
+                account.Address.Add(address1);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -526,13 +538,13 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                ParentILifecycle parent = session.Get<ParentILifecycle>(3L);
+                Account account = session.Get<Account>(3L);
 
-                ChildILifecycle child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
-                child.Name += "UPDATE";
+                address.HouseNumber = "HUT 8";
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
@@ -541,24 +553,24 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                ParentILifecycle parent = session.Get<ParentILifecycle>(3L);
+                Account account = session.Get<Account>(3L);
 
-                ChildILifecycle child = parent.Children.Single(c => c.Name.Contains("CHILD#3"));
+                Address address = account.Address.Single(c => c.Street.Contains("Adlington"));
 
-                parent.Children.Remove(child);
+                account.Address.Remove(address);
 
-                session.SaveOrUpdate(parent);
+                session.SaveOrUpdate(account);
 
                 tx.Commit();
             }
 
-            // delete parent
+            // delete Account
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                ParentILifecycle parent = session.Get<ParentILifecycle>(3L);
+                Account account = session.Get<Account>(3L);
 
-                session.Delete(parent);
+                session.Delete(account);
 
                 tx.Commit();
             }
