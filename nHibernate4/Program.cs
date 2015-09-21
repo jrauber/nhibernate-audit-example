@@ -254,7 +254,7 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Account account = session.Get<Account>(3L);
+                Account account = session.Get<Account>(1L);
 
                 account.FirstName = "Alan Mathison";
 
@@ -267,7 +267,7 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Account account = session.Get<Account>(3L);
+                Account account = session.Get<Account>(1L);
 
                 var address1 = new Address
                 {
@@ -289,7 +289,7 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Account account = session.Get<Account>(3L);
+                Account account = session.Get<Account>(1L);
 
                 Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
@@ -304,7 +304,7 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Account account = session.Get<Account>(3L);
+                Account account = session.Get<Account>(1L);
 
                 Address address = account.Address.Single(c => c.Street.Contains("Adlington"));
 
@@ -319,7 +319,7 @@ namespace nHibernate4
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
-                Account account = session.Get<Account>(3L);
+                Account account = session.Get<Account>(1L);
 
                 session.Delete(account);
 

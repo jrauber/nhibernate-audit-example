@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using nHibernate4.Model.Base;
-using NHibernate.Envers;
 using NHibernate.Envers.Configuration.Attributes;
 
 namespace nHibernate4.Model.Envers

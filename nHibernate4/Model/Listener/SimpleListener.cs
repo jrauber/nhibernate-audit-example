@@ -9,6 +9,8 @@ namespace nHibernate4.Model.Listener
     public class SimpleListener : IPreInsertEventListener, IPreUpdateEventListener, IPreDeleteEventListener, 
                                   IPreCollectionUpdateEventListener, IPostCollectionUpdateEventListener, IPreCollectionRemoveEventListener
     {
+        #region const
+
         private const string CHANGED_ON = "ChangedOn";
         private const string CHANGED_BY = "ChangedBy";
 
@@ -16,12 +18,14 @@ namespace nHibernate4.Model.Listener
         private const string CREATED_BY = "CreatedBy";
 
         private static readonly ILog Log = LogManager.GetLogger(typeof(SimpleListener));
+        
+        #endregion
 
-        public bool OnPreInsert(PreInsertEvent @event)
+        public bool OnPreInsert(PreInsertEvent args)
         {
-            Log.Debug("OnPreInsert : " + @event.Entity);
+            Log.Debug("OnPreInsert : " + args.Entity);
 
-            IAuditable entity = @event.Entity as IAuditable;
+            IAuditable entity = args.Entity as IAuditable;
 
             if (entity != null)
             {
@@ -29,39 +33,42 @@ namespace nHibernate4.Model.Listener
                 DateTime now = DateTime.Now;
                 string user = GetCurrentUserName();
 
-                int idxChangedOn = GetIndex(@event.Persister.PropertyNames, CREATED_ON);
-                int idxChangedBy = GetIndex(@event.Persister.PropertyNames, CREATED_BY);
+                int idxChangedOn = GetIndex(args.Persister.PropertyNames, CREATED_ON);
+                int idxChangedBy = GetIndex(args.Persister.PropertyNames, CREATED_BY);
 
                 auditEntity.CreatedBy = user;
                 auditEntity.CreatedOn = now;
 
-                @event.State[idxChangedOn] = now;
-                @event.State[idxChangedBy] = user;
+                args.State[idxChangedOn] = now;
+                args.State[idxChangedBy] = user;
             }
 
             return false;
         }
 
-        public bool OnPreUpdate(PreUpdateEvent @event)
+        public bool OnPreUpdate(PreUpdateEvent args)
         {
-            Log.Debug("OnPreUpdate : " + @event.Entity);
+            Log.Debug("OnPreUpdate : " + args.Entity);
 
-            IAuditable entity = @event.Entity as IAuditable;
+            IAuditable entity = args.Entity as IAuditable;
 
             if (entity != null)
             {
+
+                var dirtyField = args.Persister.FindDirty(args.State, args.OldState, args.Entity, args.Session);
+
                 IAuditable auditEntity = entity as IAuditable;
                 DateTime now = DateTime.Now;
                 string user = GetCurrentUserName();
 
-                int idxChangedOn = GetIndex(@event.Persister.PropertyNames, CHANGED_ON);
-                int idxChangedBy = GetIndex(@event.Persister.PropertyNames, CHANGED_BY);
+                int idxChangedOn = GetIndex(args.Persister.PropertyNames, CHANGED_ON);
+                int idxChangedBy = GetIndex(args.Persister.PropertyNames, CHANGED_BY);
 
                 auditEntity.ChangedBy = user;
                 auditEntity.ChangedOn = now;
 
-                @event.State[idxChangedOn] = now;
-                @event.State[idxChangedBy] = user;
+                args.State[idxChangedOn] = now;
+                args.State[idxChangedBy] = user;
             }
 
             return false;
