@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -184,13 +185,56 @@ namespace nHibernate4
                 tx.Commit();
             }
 
-            // Retrive object-state by revision number
+            // Querying for entities of a class at a given revision
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
-                IEntityAuditQuery<Account> query = auditReader.CreateQuery().ForEntitiesAtRevision<Account>(5);
-                IEnumerable<Account> entity = query.Results();
+                IEntityAuditQuery<Address> query = auditReader.CreateQuery().ForEntitiesAtRevision<Address>(5)
+                                                                   .AddOrder(AuditEntity.Property("City").Desc())
+                                                                   .Add(AuditEntity.RelatedId("Account").Eq(1));
+
+                IEnumerable<Address> entity = query.Results();
+
+                tx.Commit();
+            }
+
+            // Querying for revisions, at which entities of a given class changed
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                IAuditReader auditReader = session.Auditer();
+                IAuditQuery query = auditReader.CreateQuery().ForRevisionsOfEntity(typeof(Address), false, true)
+                                                                .AddProjection(AuditEntity.RevisionNumber().Min())
+                                                                .Add(AuditEntity.Id().Eq(22))
+                                                                .Add(AuditEntity.RevisionNumber().Gt(4));
+
+
+                IList entity = query.GetResultList();
+
+                tx.Commit();
+            }
+
+             // Querying for revisions of entity that modified given property
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                IAuditReader auditReader = session.Auditer();
+
+               //var query = auditReader.CreateQuery().ForEntitiesAtRevision(typeof (Address), 4)
+               //                               .Add(AuditEntity.Property("HouseNumber").HasChanged())
+	           //                               .Add(AuditEntity.Property("ZipCode").HasNotChanged());
+
+                var query = auditReader.CreateQuery().ForRevisionsOfEntity(typeof(Address), false, true)
+                                              //.Add(AuditEntity.Property("HouseNumber").HasChanged())
+	                                          .Add(AuditEntity.Property("ZipCode").HasNotChanged());
+
+               // var query = auditReader.CreateQuery().ForEntitiesAtRevision(typeof(Address), 6)
+               //                             .Add(AuditEntity.Property("HouseNumber").HasChanged())
+               //                            .Add(AuditEntity.Property("ZipCode").HasNotChanged());
+
+
+                IList entity = query.GetResultList();
 
                 tx.Commit();
             }
