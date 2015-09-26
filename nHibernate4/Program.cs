@@ -134,10 +134,23 @@ namespace nHibernate4
             using (var tx = session.BeginTransaction())
             {
                 Account account = session.Get<Account>(1L);
-
                 Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
 
                 address.HouseNumber = "HUT 8";
+
+                session.SaveOrUpdate(account);
+
+                tx.Commit();
+            }
+
+            // rename entry in existing collection - again
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                Account account = session.Get<Account>(1L);
+                Address address = account.Address.Single(c => c.Street.Contains("Bletchley"));
+
+                address.HouseNumber = "HUT EIGHT";
 
                 session.SaveOrUpdate(account);
 
@@ -174,7 +187,8 @@ namespace nHibernate4
 
             #region query
 
-            // Retrive object-state by revision number
+            // Query object-state by revision number
+            // -> All Accounts in (REVISION 5)
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
@@ -185,13 +199,13 @@ namespace nHibernate4
                 tx.Commit();
             }
 
-            // Querying for entities of a class at a given revision
+            // Query for entities related to a parent entity
+            // -> All Addresses that existed in (REVISION 5) and that reference Account with ID 1
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
                 IEntityAuditQuery<Address> query = auditReader.CreateQuery().ForEntitiesAtRevision<Address>(5)
-                                                                   .AddOrder(AuditEntity.Property("City").Desc())
                                                                    .Add(AuditEntity.RelatedId("Account").Eq(1));
 
                 IEnumerable<Address> entity = query.Results();
@@ -199,42 +213,46 @@ namespace nHibernate4
                 tx.Commit();
             }
 
-            // Querying for revisions, at which entities of a given class changed
+            // Querying for the minimal change revision (Rev-Number) after revision x for an entity
+            // First Revision-Number that successes (REVISION 4) and contains changes of (Entity 22)
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
                 IAuditQuery query = auditReader.CreateQuery().ForRevisionsOfEntity(typeof(Address), false, true)
-                                                                .AddProjection(AuditEntity.RevisionNumber().Min())
-                                                                .Add(AuditEntity.Id().Eq(22))
-                                                                .Add(AuditEntity.RevisionNumber().Gt(4));
-
+                                                                .AddProjection(AuditEntity.RevisionNumber().Min()) // minimal value projection
+                                                                .Add(AuditEntity.Id().Eq(22)) // id of the searched entity
+                                                                .Add(AuditEntity.RevisionNumber().Gt(4)); // lower boundary (excl.)
 
                 IList entity = query.GetResultList();
 
                 tx.Commit();
             }
 
-             // Querying for revisions of entity that modified given property
+            // querying for all addresses that do not have changes on a defined property compared to their
+            // predecessor revision
             using (var session = sf.OpenSession())
             using (var tx = session.BeginTransaction())
             {
                 IAuditReader auditReader = session.Auditer();
-
-               //var query = auditReader.CreateQuery().ForEntitiesAtRevision(typeof (Address), 4)
-               //                               .Add(AuditEntity.Property("HouseNumber").HasChanged())
-	           //                               .Add(AuditEntity.Property("ZipCode").HasNotChanged());
-
-                var query = auditReader.CreateQuery().ForRevisionsOfEntity(typeof(Address), false, true)
-                                              //.Add(AuditEntity.Property("HouseNumber").HasChanged())
+                
+                // search in every revision
+                var query1 = auditReader.CreateQuery().ForRevisionsOfEntity(typeof(Address), false, true)
 	                                          .Add(AuditEntity.Property("ZipCode").HasNotChanged());
 
-               // var query = auditReader.CreateQuery().ForEntitiesAtRevision(typeof(Address), 6)
-               //                             .Add(AuditEntity.Property("HouseNumber").HasChanged())
-               //                            .Add(AuditEntity.Property("ZipCode").HasNotChanged());
+                IList entity1 = query1.GetResultList();
 
+                // search in every revision below or equal to REV 6
+                var query2 = auditReader.CreateQuery().ForEntitiesAtRevision(typeof(Address), 6)
+                                              .Add(AuditEntity.Property("ZipCode").HasNotChanged());
 
-                IList entity = query.GetResultList();
+                IList entity2 = query2.GetResultList();
+
+                // search only in REV 6
+                var query3 = auditReader.CreateQuery().ForEntitiesModifiedAtRevision(typeof(Address), 6)
+                                              .Add(AuditEntity.Property("ZipCode").HasNotChanged());
+
+                IList entity3 = query3.GetResultList();
 
                 tx.Commit();
             }
