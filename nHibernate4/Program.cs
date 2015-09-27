@@ -32,9 +32,9 @@ namespace nHibernate4
 
             //ExampleInterceptor();
 
-            //ExampleListener();
+            ExampleListener();
 
-            ExampleEnvers();
+            //ExampleEnvers();
         }
 
         private static void ExampleEnvers()
@@ -270,12 +270,12 @@ namespace nHibernate4
 
             cfg.AddMapping(mapping);
 
-            cfg.SetListener(ListenerType.PreInsert, new SimpleListener());
-            cfg.SetListener(ListenerType.PreUpdate, new SimpleListener());
-            cfg.SetListener(ListenerType.PreDelete, new SimpleListener());
-            cfg.SetListener(ListenerType.PreCollectionUpdate, new SimpleListener());
-            cfg.SetListener(ListenerType.PostCollectionUpdate, new SimpleListener());
-            cfg.SetListener(ListenerType.PreCollectionRemove, new SimpleListener());
+            var advListener = new AdvancedListener();
+            advListener.Register(cfg);
+
+            // SimpleListener has flaws see omments inside Class
+            //cfg.SetListener(ListenerType.PreInsert, new SimpleListener());
+            //cfg.SetListener(ListenerType.PreUpdate, new SimpleListener());
 
             var sf = cfg.BuildSessionFactory();
 

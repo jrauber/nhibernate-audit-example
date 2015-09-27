@@ -69,6 +69,7 @@
     <Compile Include="Mapping\AddressMap.cs" />
     <Compile Include="Mapping\AccountMap.cs" />
     <Compile Include="Model\Base\IAuditable.cs" />
+    <Compile Include="Model\Listener\AdvancedListener.cs" />
     <Compile Include="Model\Listener\SimpleListener.cs" />
     <Compile Include="Model\Account.cs" />
     <Compile Include="Model\Address.cs" />

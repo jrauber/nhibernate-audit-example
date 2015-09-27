@@ -6,8 +6,14 @@ using NHibernate.Event;
 
 namespace nHibernate4.Model.Listener
 {
-    public class SimpleListener : IPreInsertEventListener, IPreUpdateEventListener, IPreDeleteEventListener, 
-                                  IPreCollectionUpdateEventListener, IPostCollectionUpdateEventListener, IPreCollectionRemoveEventListener
+    /// <summary>
+    /// SimpleListener based on the example given Oren Eini
+    /// at http://ayende.com/blog/3987/nhibernate-ipreupdateeventlistener-ipreinserteventlistener
+    /// 
+    /// WARNING - This implementation might be broken in some edge cases
+    /// see: http://nhibernate.info/doc/howto/various/changing-values-in-nhibernate-events.html
+    /// </summary>
+    public class SimpleListener : IPreInsertEventListener, IPreUpdateEventListener
     {
         #region const
 
