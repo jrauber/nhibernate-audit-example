@@ -388,6 +388,49 @@ namespace nHibernate4
                 tx.Commit();
             }
 
+            // Example where History would be missing and 
+            // how to fix it with Merge()
+            Account detachedAccount; 
+
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                detachedAccount = new Account()
+                {
+                    FirstName = "FirstNameInital",
+                    LastName = "FirstNameInital"
+                };
+
+                session.SaveOrUpdate(detachedAccount);
+                tx.Commit();
+            }
+            // At this point detachedAccount it detached
+
+            detachedAccount.FirstName = "FirstNameChanged";
+            detachedAccount.LastName = "LastNameChanged";
+
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                // History would not be present in listener
+                session.SaveOrUpdate(detachedAccount);
+                tx.Commit();
+            }
+
+            // Example where History would be present
+            using (var session = sf.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                // Attach object to session
+                var acc = session.Merge(detachedAccount);
+
+                acc.FirstName = "FirstNameChangedAgain";
+                acc.LastName = "LastNameChangedAgain";
+
+                session.SaveOrUpdate(acc);
+                tx.Commit();
+            }
+
             #endregion
         }
 
